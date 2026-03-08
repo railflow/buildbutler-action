@@ -17,7 +17,7 @@ The **Build Butler** GitHub Action automatically captures and ships data from ev
 - **Test results** — JUnit XML parsed and sent as structured test suites
 - **Runner fleet** — self-hosted runner status (BUILDING → ONLINE lifecycle)
 
-![Build Butler Dashboard](docs/screenshot-dashboard.png)
+![Build Butler Dashboard](docs/screenshot-dashboard.svg)
 
 > _Screenshot: Build Butler dashboard showing build trends, test pass rates, and runner utilisation._
 
