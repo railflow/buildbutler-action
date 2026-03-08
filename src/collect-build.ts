@@ -17,7 +17,7 @@ function mapConclusion(conclusion: string): BuildStatus {
 export interface BuildPayload {
   id: string;
   jobName: string;
-  jobDisplayName: string;
+  jobUrl: string;
   buildNumber: number;
   status: BuildStatus;
   duration: number;
@@ -45,7 +45,10 @@ export function collectBuild(overrideStatus?: string, queueDurationMs?: number):
   // GITHUB_WORKFLOW_REF = "owner/repo/.github/workflows/ci.yml@refs/heads/main"
   const workflowRef   = process.env.GITHUB_WORKFLOW_REF ?? '';
   const workflowFile  = workflowRef.match(/\/\.github\/workflows\/([^@]+)/)?.[1];
-  const workflow      = workflowFile ?? process.env.GITHUB_WORKFLOW!;
+  const workflow      = process.env.GITHUB_WORKFLOW!;
+  const jobUrl        = workflowFile
+    ? `https://github.com/${repo}/actions/workflows/${workflowFile}`
+    : `https://github.com/${repo}/actions`;
   const sha        = process.env.GITHUB_SHA;
   const ref        = process.env.GITHUB_REF_NAME;
   const eventName  = process.env.GITHUB_EVENT_NAME;
@@ -67,7 +70,7 @@ export function collectBuild(overrideStatus?: string, queueDurationMs?: number):
   const payload: BuildPayload = {
     id: crypto.randomUUID(),
     jobName: workflow,
-    jobDisplayName: process.env.GITHUB_WORKFLOW!,
+    jobUrl,
     buildNumber: runNumber,
     status,
     duration,

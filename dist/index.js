@@ -25904,7 +25904,8 @@ function collectBuild(overrideStatus, queueDurationMs) {
   const runId = process.env.GITHUB_RUN_ID;
   const workflowRef = process.env.GITHUB_WORKFLOW_REF ?? "";
   const workflowFile = workflowRef.match(/\/\.github\/workflows\/([^@]+)/)?.[1];
-  const workflow = workflowFile ?? process.env.GITHUB_WORKFLOW;
+  const workflow = process.env.GITHUB_WORKFLOW;
+  const jobUrl = workflowFile ? `https://github.com/${repo}/actions/workflows/${workflowFile}` : `https://github.com/${repo}/actions`;
   const sha = process.env.GITHUB_SHA;
   const ref = process.env.GITHUB_REF_NAME;
   const eventName = process.env.GITHUB_EVENT_NAME;
@@ -25921,7 +25922,7 @@ function collectBuild(overrideStatus, queueDurationMs) {
   const payload = {
     id: crypto.randomUUID(),
     jobName: workflow,
-    jobDisplayName: process.env.GITHUB_WORKFLOW,
+    jobUrl,
     buildNumber: runNumber,
     status,
     duration,
