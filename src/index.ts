@@ -32,9 +32,12 @@ async function main() {
           const runId = parseInt(process.env.GITHUB_RUN_ID!, 10);
           const { data } = await octokit.rest.actions.getWorkflowRun({ owner, repo, run_id: runId });
           startedAt = data.run_started_at ?? data.created_at;
-        } catch {
-          // fall through to current time
+          core.info(`[Build Butler] Workflow started at ${startedAt} (from API)`);
+        } catch (err) {
+          core.warning(`[Build Butler] Could not fetch run start time: ${err}`);
         }
+      } else {
+        core.warning('[Build Butler] No token available to fetch run start time — duration will be inaccurate. Pass github-token: ${{ github.token }} for accurate duration.');
       }
     }
     core.saveState('STARTED_AT', startedAt || new Date().toISOString());
