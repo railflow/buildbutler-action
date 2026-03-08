@@ -180,7 +180,7 @@ jobs:
         with:
           api-key: ${{ secrets.BUILDBUTLER_API_KEY }}
           test-results: 'build/test-results/**/*.xml'
-          github-token: ${{ secrets.GH_RUNNERS_PAT }}
+          github-token: ${{ secrets.GH_RUNNERS_PAT }}  # omit if using GitHub-hosted runners
 ```
 
 > The `workflow_run` trigger fires after any workflow completes — success or failure — making it ideal for org-wide reporting without touching individual pipelines.
