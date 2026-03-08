@@ -33,6 +33,10 @@ inputs:
     required: false
     default: ''
 
+branding:
+  icon: 'trending-up'
+  color: 'blue'
+
 runs:
   using: 'node20'
   main: 'dist/index.js'
