@@ -10,6 +10,10 @@ inputs:
     description: 'Glob pattern for JUnit XML files (e.g. build/test-results/**/*.xml)'
     required: false
     default: ''
+  status:
+    description: 'Override build conclusion (auto-detected from job context if omitted)'
+    required: false
+    default: ''
   github-token:
     description: |
       PAT for full runner fleet reporting (all self-hosted runners, not just the current one).
