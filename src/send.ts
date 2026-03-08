@@ -9,7 +9,7 @@ async function post(opts: SendOptions, path: string, body: unknown): Promise<voi
     method:  'POST',
     headers: {
       'Content-Type':  'application/json',
-      'Authorization': `Bearer ${opts.apiKey}`,
+      'X-API-Key': opts.apiKey,
     },
     body: JSON.stringify(body),
   });
