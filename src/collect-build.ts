@@ -25,6 +25,7 @@ export interface BuildPayload {
   branch?: string;
   commitSha?: string;
   jenkinsInstanceId: string;
+  url: string;
   cause?: string;
   nodeInfo?: {
     nodeName: string;
@@ -70,6 +71,7 @@ export function collectBuild(overrideStatus?: string, queueDurationMs?: number):
     branch: ref,
     commitSha: sha,
     jenkinsInstanceId: `https://github.com/${repo}`,
+    url: `https://github.com/${repo}/actions/runs/${runId}`,
     cause: eventName,
     nodeInfo: runnerName
       ? { nodeName: runnerName, nodeLabels: runnerLabels ? runnerLabels.split(',').map(s => s.trim()) : [], isBuiltIn }

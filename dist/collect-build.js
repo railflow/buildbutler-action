@@ -77,6 +77,7 @@ function collectBuild(overrideStatus, queueDurationMs) {
         branch: ref,
         commitSha: sha,
         jenkinsInstanceId: `https://github.com/${repo}`,
+        url: `https://github.com/${repo}/actions/runs/${runId}`,
         cause: eventName,
         nodeInfo: runnerName
             ? { nodeName: runnerName, nodeLabels: runnerLabels ? runnerLabels.split(',').map(s => s.trim()) : [], isBuiltIn }
