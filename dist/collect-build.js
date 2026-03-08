@@ -83,7 +83,7 @@ function collectBuild(overrideStatus, queueDurationMs) {
         completedAt,
         branch: ref,
         commitSha: sha,
-        jenkinsInstanceId: `https://github.com/${repo}`,
+        jenkinsInstanceId: jobUrl,
         url: `https://github.com/${repo}/actions/runs/${runId}`,
         cause: eventName,
         nodeInfo: runnerName
