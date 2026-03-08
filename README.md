@@ -155,7 +155,7 @@ Create the PAT at **Settings → Developer settings → Personal access tokens**
 
 ## Organisation-wide Reporting (GitHub Enterprise)
 
-GitHub Enterprise allows admins to enforce a workflow across **all repositories automatically** using [Required Workflows](https://docs.github.com/en/enterprise-cloud@latest/actions/using-workflows/required-workflows) — no changes needed in individual repos.
+GitHub Enterprise allows admins to enforce a workflow across **all repositories automatically** using [Repository Rulesets](https://docs.github.com/en/enterprise-cloud@latest/organizations/managing-organization-settings/managing-rulesets-for-repositories-in-your-organization) — no changes needed in individual repos.
 
 ### Step 1 — Create the Build Butler workflow in a central repo
 
@@ -189,11 +189,11 @@ jobs:
 - Name: `BUILDBUTLER_API_KEY`
 - Access: all repositories (or select specific ones)
 
-### Step 3 — Enforce as a Required Workflow
+### Step 3 — Enforce via Repository Rulesets
 
-**Org Settings → Actions → Required Workflows → Add workflow**
-- Select the repository and workflow file from Step 1
-- Apply to: all repositories or specific ones
+**Org Settings → Rules → Rulesets → New ruleset**
+- Target: all repositories (or specific ones)
+- Add rule: **Require workflows to pass** → select the workflow from Step 1
 
 Once set, every workflow run across the org is automatically reported to Build Butler — no per-repo changes needed.
 
