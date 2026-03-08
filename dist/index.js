@@ -25920,6 +25920,7 @@ function collectBuild(overrideStatus, queueDurationMs) {
   const payload = {
     id: crypto.randomUUID(),
     jobName: workflow,
+    jobDisplayName: process.env.GITHUB_WORKFLOW,
     buildNumber: runNumber,
     status,
     duration,
