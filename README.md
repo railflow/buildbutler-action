@@ -61,7 +61,7 @@ jobs:
 | `api-key` | **Yes** | — | Your Build Butler API key. Store as a [repository secret](https://docs.github.com/en/actions/security-guides/encrypted-secrets). |
 | `test-results` | No | `''` | Glob pattern for JUnit XML files (e.g. `build/test-results/**/*.xml`, `**/TEST-*.xml`). Omit to skip test reporting. |
 | `status` | No | `''` | Override the build conclusion (`success`, `failure`, `cancelled`). Auto-detected from the job context if omitted. |
-| `github-token` | No | `''` | PAT for full runner fleet reporting (see [Runner Fleet Reporting](#runner-fleet-reporting)). |
+| `github-token` | No | `''` | **Self-hosted runners only.** Not needed for GitHub-hosted (cloud) runners. Provides fleet-wide runner reporting (see [Runner Fleet Reporting](#runner-fleet-reporting)). |
 
 ---
 
@@ -122,6 +122,10 @@ Each matrix leg is reported as a separate build — Build Butler groups them by 
 ---
 
 ## Runner Fleet Reporting
+
+> **Using GitHub-hosted (cloud) runners? Skip this section** — `github-token` is not required and runner fleet reporting does not apply.
+
+For **self-hosted runner** setups, the action can report fleet-wide runner status to Build Butler.
 
 Without `github-token`, only the runner executing the current job is reported (status changes from `BUILDING` to `ONLINE` on job completion).
 
