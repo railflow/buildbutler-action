@@ -175,10 +175,12 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     steps:
-      - name: Report to Build Butler
-        uses: railflow/buildbutler-action@v1
+      - uses: railflow/buildbutler-action@v1
+        if: always()
         with:
           api-key: ${{ secrets.BUILDBUTLER_API_KEY }}
+          test-results: 'build/test-results/**/*.xml'
+          github-token: ${{ secrets.GH_RUNNERS_PAT }}
 ```
 
 > The `workflow_run` trigger fires after any workflow completes — success or failure — making it ideal for org-wide reporting without touching individual pipelines.
