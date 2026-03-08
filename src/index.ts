@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import * as github from '@actions/github';
 import { collectBuild } from './collect-build';
 import { collectTests }  from './collect-tests';
 import { collectAgent, collectFleetRunners } from './collect-agents';
@@ -18,7 +19,25 @@ async function main() {
   if (!IS_POST) {
     // Main step: save state so the post step runs, report runner as BUILDING
     core.saveState('IS_POST', 'true');
-    core.saveState('STARTED_AT', new Date().toISOString());
+
+    // Get accurate workflow start time. Prefer GITHUB_RUN_STARTED_AT (newer runners),
+    // then fetch from GitHub API via the auto-injected GITHUB_TOKEN, then fall back to now.
+    let startedAt = process.env.GITHUB_RUN_STARTED_AT;
+    if (!startedAt) {
+      const token = githubToken || process.env.GITHUB_TOKEN;
+      if (token) {
+        try {
+          const octokit = github.getOctokit(token);
+          const [owner, repo] = process.env.GITHUB_REPOSITORY!.split('/');
+          const runId = parseInt(process.env.GITHUB_RUN_ID!, 10);
+          const { data } = await octokit.rest.actions.getWorkflowRun({ owner, repo, run_id: runId });
+          startedAt = data.run_started_at ?? data.created_at;
+        } catch {
+          // fall through to current time
+        }
+      }
+    }
+    core.saveState('STARTED_AT', startedAt || new Date().toISOString());
 
     const agentSnap = collectAgent('BUILDING');
     if (agentSnap) {
