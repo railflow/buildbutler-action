@@ -9,13 +9,15 @@ async function post(opts, path, body) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${opts.apiKey}`,
+            'X-API-Key': opts.apiKey,
         },
         body: JSON.stringify(body),
     });
     if (!res.ok) {
         const text = await res.text().catch(() => '');
-        throw new Error(`POST ${path} → ${res.status} ${res.statusText}: ${text}`);
+        const err = new Error(`POST ${path} → ${res.status} ${res.statusText}: ${text}`);
+        err.requestBody = body;
+        throw err;
     }
 }
 async function sendBuild(opts, payload) {
