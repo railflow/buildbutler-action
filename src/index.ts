@@ -15,24 +15,23 @@ async function main() {
 
   const opts = { apiKey, apiUrl };
 
-  if (IS_POST) {
-    // Post step: mark current runner as ONLINE (released).
-    // We always send an individual update here — the fleet snapshot captured in
-    // the main step showed this runner as BUILDING, so we need to flip it back.
-    const agentSnap = collectAgent('ONLINE');
+  if (!IS_POST) {
+    // Main step: save state so the post step runs, report runner as BUILDING
+    core.saveState('IS_POST', 'true');
+    core.saveState('STARTED_AT', new Date().toISOString());
+
+    const agentSnap = collectAgent('BUILDING');
     if (agentSnap) {
       try {
         await sendAgentSnapshot(opts, agentSnap);
-        core.info('[Build Butler] Runner released → ONLINE');
       } catch (err) {
-        core.warning(`[Build Butler] Could not update runner status:\n${(err as any)?.stack ?? err}\nRequest body: ${JSON.stringify((err as any)?.requestBody, null, 2)}`);
+        core.warning(`[Build Butler] Could not report runner: ${err}`);
       }
     }
     return;
   }
 
-  // Main step: save state so the post step runs
-  core.saveState('IS_POST', 'true');
+  // Post step: workflow has completed — report build with accurate timing + tests + runner
 
   // 1. Collect and send build
   const build = collectBuild();
@@ -41,10 +40,10 @@ async function main() {
     await sendBuild(opts, build);
     core.info('[Build Butler] Build reported.');
   } catch (err) {
-    core.warning(`[Build Butler] Could not report build:\n${(err as any)?.stack ?? err}\nRequest body: ${JSON.stringify((err as any)?.requestBody, null, 2)}`);
+    core.warning(`[Build Butler] Could not report build: ${err}`);
   }
 
-  // 2. Send runner fleet snapshot if github-token provided, otherwise single runner
+  // 2. Send runner fleet snapshot if github-token provided, otherwise mark single runner ONLINE
   if (githubToken) {
     try {
       const fleetSnap = await collectFleetRunners(githubToken);
@@ -53,18 +52,17 @@ async function main() {
         core.info(`[Build Butler] Fleet reported: ${fleetSnap.agents.length} runner(s).`);
       }
     } catch (err) {
-      core.warning(`[Build Butler] Could not report runner fleet:\n${(err as any)?.stack ?? err}\nRequest body: ${JSON.stringify((err as any)?.requestBody, null, 2)}`);
-      // Fall back to single runner
-      const agentSnap = collectAgent('BUILDING');
+      core.warning(`[Build Butler] Could not report runner fleet: ${err}`);
+      const agentSnap = collectAgent('ONLINE');
       if (agentSnap) await sendAgentSnapshot(opts, agentSnap).catch(() => {});
     }
   } else {
-    const agentSnap = collectAgent('BUILDING');
+    const agentSnap = collectAgent('ONLINE');
     if (agentSnap) {
       try {
         await sendAgentSnapshot(opts, agentSnap);
       } catch (err) {
-        core.warning(`[Build Butler] Could not report runner:\n${(err as any)?.stack ?? err}\nRequest body: ${JSON.stringify((err as any)?.requestBody, null, 2)}`);
+        core.warning(`[Build Butler] Could not update runner status: ${err}`);
       }
     }
   }
@@ -80,11 +78,11 @@ async function main() {
       }
       if (suites.length > 0) core.info('[Build Butler] Test results reported.');
     } catch (err) {
-      core.warning(`[Build Butler] Could not report test results:\n${(err as any)?.stack ?? err}\nRequest body: ${JSON.stringify((err as any)?.requestBody, null, 2)}`);
+      core.warning(`[Build Butler] Could not report test results: ${err}`);
     }
   }
 }
 
 main().catch((err) => {
-  core.setFailed(`[Build Butler] ${(err as any)?.stack ?? err}`);
+  core.setFailed(`[Build Butler] ${err}`);
 });

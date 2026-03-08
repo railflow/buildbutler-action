@@ -44,7 +44,9 @@ export function collectBuild(overrideStatus?: string, queueDurationMs?: number):
   const sha        = process.env.GITHUB_SHA;
   const ref        = process.env.GITHUB_REF_NAME;
   const eventName  = process.env.GITHUB_EVENT_NAME;
-  const startedAt  = process.env.GITHUB_RUN_STARTED_AT ?? new Date().toISOString();
+  // STATE_STARTED_AT is saved by the main step so the post step gets accurate timing.
+  // Fall back to GITHUB_RUN_STARTED_AT then current time as last resort.
+  const startedAt  = core.getState('STARTED_AT') || process.env.GITHUB_RUN_STARTED_AT || new Date().toISOString();
   const completedAt = new Date().toISOString();
   const runnerName  = process.env.RUNNER_NAME;
   const runnerLabels = process.env.RUNNER_LABELS ?? '';
@@ -67,7 +69,7 @@ export function collectBuild(overrideStatus?: string, queueDurationMs?: number):
     completedAt,
     branch: ref,
     commitSha: sha,
-    jenkinsInstanceId: repo,
+    jenkinsInstanceId: `https://github.com/${repo}`,
     cause: eventName,
     nodeInfo: runnerName
       ? { nodeName: runnerName, nodeLabels: runnerLabels ? runnerLabels.split(',').map(s => s.trim()) : [], isBuiltIn }

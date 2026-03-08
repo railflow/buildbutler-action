@@ -6,6 +6,10 @@ inputs:
   api-key:
     description: 'Build Butler API key (store as a repo secret)'
     required: true
+  api-url:
+    description: 'Build Butler API base URL'
+    required: false
+    default: 'https://api.buildbutler.dev'
   test-results:
     description: 'Glob pattern for JUnit XML files (e.g. build/test-results/**/*.xml)'
     required: false
@@ -24,13 +28,10 @@ inputs:
                      OR repo                 (repo-level runners only)
         Fine-grained :  "Self-hosted runners" → Read  (repo and/or org level)
 
-      Store as a repo/org secret and pass via secrets context, e.g. secrets.GH_RUNNERS_PAT
+      Store as a repo/org secret and pass via:
+        github-token: ${{ secrets.GH_RUNNERS_PAT }}
     required: false
     default: ''
-
-branding:
-  icon: 'trending-up'
-  color: 'blue'
 
 runs:
   using: 'node20'
