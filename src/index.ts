@@ -55,8 +55,24 @@ async function main() {
 
   // Post step: workflow has completed — report build with accurate timing + tests + runner
 
-  // 1. Collect and send build
-  const build = collectBuild();
+  // 1. Fetch run timing from GitHub API for accurate duration
+  let runStartedAt: string | undefined;
+  let runCompletedAt: string | undefined;
+  const token = githubToken || process.env.GITHUB_TOKEN;
+  if (token) {
+    try {
+      const octokit = github.getOctokit(token);
+      const [owner, repo] = process.env.GITHUB_REPOSITORY!.split('/');
+      const runId = parseInt(process.env.GITHUB_RUN_ID!, 10);
+      const { data } = await octokit.rest.actions.getWorkflowRun({ owner, repo, run_id: runId });
+      runStartedAt  = data.run_started_at ?? data.created_at;
+      runCompletedAt = data.updated_at;
+    } catch (err) {
+      core.warning(`[Build Butler] Could not fetch run timing: ${err}`);
+    }
+  }
+
+  const build = collectBuild(undefined, undefined, runStartedAt, runCompletedAt);
   core.info(`[Build Butler] Timing: startedAt=${build.startedAt} completedAt=${build.completedAt} duration=${build.duration}ms`);
   core.info(`[Build Butler] Reporting build ${build.jobName} #${build.buildNumber} → ${build.status}`);
   try {

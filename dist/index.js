@@ -25898,7 +25898,7 @@ function mapConclusion(conclusion) {
       return "FAILURE";
   }
 }
-function collectBuild(overrideStatus, queueDurationMs) {
+function collectBuild(overrideStatus, queueDurationMs, startedAtOverride, completedAtOverride) {
   const repo = process.env.GITHUB_REPOSITORY;
   const runNumber = parseInt(process.env.GITHUB_RUN_NUMBER, 10);
   const runId = process.env.GITHUB_RUN_ID;
@@ -25909,8 +25909,8 @@ function collectBuild(overrideStatus, queueDurationMs) {
   const sha = process.env.GITHUB_SHA;
   const ref = process.env.GITHUB_REF_NAME;
   const eventName = process.env.GITHUB_EVENT_NAME;
-  const startedAt = process.env.GITHUB_RUN_STARTED_AT || core.getState("STARTED_AT") || (/* @__PURE__ */ new Date()).toISOString();
-  const completedAt = (/* @__PURE__ */ new Date()).toISOString();
+  const startedAt = startedAtOverride || process.env.GITHUB_RUN_STARTED_AT || core.getState("STARTED_AT") || (/* @__PURE__ */ new Date()).toISOString();
+  const completedAt = completedAtOverride || (/* @__PURE__ */ new Date()).toISOString();
   const runnerName = process.env.RUNNER_NAME;
   const runnerLabels = process.env.RUNNER_LABELS ?? "";
   const isBuiltIn = !runnerLabels.includes("self-hosted");
@@ -32142,10 +32142,10 @@ async function main() {
     core2.saveState("IS_POST", "true");
     let startedAt = process.env.GITHUB_RUN_STARTED_AT;
     if (!startedAt) {
-      const token = githubToken || process.env.GITHUB_TOKEN;
-      if (token) {
+      const token2 = githubToken || process.env.GITHUB_TOKEN;
+      if (token2) {
         try {
-          const octokit = github2.getOctokit(token);
+          const octokit = github2.getOctokit(token2);
           const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
           const runId = parseInt(process.env.GITHUB_RUN_ID, 10);
           const { data } = await octokit.rest.actions.getWorkflowRun({ owner, repo, run_id: runId });
@@ -32169,7 +32169,22 @@ async function main() {
     }
     return;
   }
-  const build = collectBuild();
+  let runStartedAt;
+  let runCompletedAt;
+  const token = githubToken || process.env.GITHUB_TOKEN;
+  if (token) {
+    try {
+      const octokit = github2.getOctokit(token);
+      const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+      const runId = parseInt(process.env.GITHUB_RUN_ID, 10);
+      const { data } = await octokit.rest.actions.getWorkflowRun({ owner, repo, run_id: runId });
+      runStartedAt = data.run_started_at ?? data.created_at;
+      runCompletedAt = data.updated_at;
+    } catch (err) {
+      core2.warning(`[Build Butler] Could not fetch run timing: ${err}`);
+    }
+  }
+  const build = collectBuild(void 0, void 0, runStartedAt, runCompletedAt);
   core2.info(`[Build Butler] Timing: startedAt=${build.startedAt} completedAt=${build.completedAt} duration=${build.duration}ms`);
   core2.info(`[Build Butler] Reporting build ${build.jobName} #${build.buildNumber} \u2192 ${build.status}`);
   try {

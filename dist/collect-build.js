@@ -46,7 +46,7 @@ function mapConclusion(conclusion) {
         default: return 'FAILURE';
     }
 }
-function collectBuild(overrideStatus, queueDurationMs) {
+function collectBuild(overrideStatus, queueDurationMs, startedAtOverride, completedAtOverride) {
     const repo = process.env.GITHUB_REPOSITORY;
     const runNumber = parseInt(process.env.GITHUB_RUN_NUMBER, 10);
     const runId = process.env.GITHUB_RUN_ID;
@@ -60,10 +60,8 @@ function collectBuild(overrideStatus, queueDurationMs) {
     const sha = process.env.GITHUB_SHA;
     const ref = process.env.GITHUB_REF_NAME;
     const eventName = process.env.GITHUB_EVENT_NAME;
-    // Use GITHUB_RUN_STARTED_AT for whole-workflow duration.
-    // Fall back to saved state then current time as last resort.
-    const startedAt = process.env.GITHUB_RUN_STARTED_AT || core.getState('STARTED_AT') || new Date().toISOString();
-    const completedAt = new Date().toISOString();
+    const startedAt = startedAtOverride || process.env.GITHUB_RUN_STARTED_AT || core.getState('STARTED_AT') || new Date().toISOString();
+    const completedAt = completedAtOverride || new Date().toISOString();
     const runnerName = process.env.RUNNER_NAME;
     const runnerLabels = process.env.RUNNER_LABELS ?? '';
     const isBuiltIn = !runnerLabels.includes('self-hosted');
