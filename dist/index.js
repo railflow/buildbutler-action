@@ -32110,7 +32110,7 @@ async function post(opts, path2, body) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${opts.apiKey}`
+      "X-API-Key": opts.apiKey
     },
     body: JSON.stringify(body)
   });
