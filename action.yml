@@ -29,7 +29,7 @@ inputs:
         Fine-grained :  "Self-hosted runners" → Read  (repo and/or org level)
 
       Store as a repo/org secret and pass via:
-        github-token: ${{ secrets.GH_RUNNERS_PAT }}
+        github-token: ${{ '${{ secrets.GH_RUNNERS_PAT }}' }}
     required: false
     default: ''
 
