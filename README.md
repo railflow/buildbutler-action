@@ -59,9 +59,7 @@ jobs:
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
 | `api-key` | **Yes** | — | Your Build Butler API key. Store as a [repository secret](https://docs.github.com/en/actions/security-guides/encrypted-secrets). |
-| `api-url` | No | `https://api.buildbutler.dev` | Override if you self-host Build Butler. |
 | `test-results` | No | `''` | Glob pattern for JUnit XML files (e.g. `build/test-results/**/*.xml`, `**/TEST-*.xml`). Omit to skip test reporting. |
-| `status` | No | `''` | Override the build conclusion (`success`, `failure`, `cancelled`). Auto-detected from the job context if omitted. |
 | `github-token` | No | `''` | PAT for full runner fleet reporting (see [Runner Fleet Reporting](#runner-fleet-reporting)). |
 
 ---
