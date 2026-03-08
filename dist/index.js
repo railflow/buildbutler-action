@@ -32111,7 +32111,9 @@ async function post(opts, path2, body) {
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new Error(`POST ${path2} \u2192 ${res.status} ${res.statusText}: ${text}`);
+    const err = new Error(`POST ${path2} \u2192 ${res.status} ${res.statusText}: ${text}`);
+    err.requestBody = body;
+    throw err;
   }
 }
 async function sendBuild(opts, payload) {
@@ -32139,7 +32141,9 @@ async function main() {
         await sendAgentSnapshot(opts, agentSnap);
         core2.info("[Build Butler] Runner released \u2192 ONLINE");
       } catch (err) {
-        core2.warning(`[Build Butler] Could not update runner status: ${err}`);
+        core2.warning(`[Build Butler] Could not update runner status:
+${err?.stack ?? err}
+Request body: ${JSON.stringify(err?.requestBody, null, 2)}`);
       }
     }
     return;
@@ -32151,7 +32155,9 @@ async function main() {
     await sendBuild(opts, build);
     core2.info("[Build Butler] Build reported.");
   } catch (err) {
-    core2.warning(`[Build Butler] Could not report build: ${err}`);
+    core2.warning(`[Build Butler] Could not report build:
+${err?.stack ?? err}
+Request body: ${JSON.stringify(err?.requestBody, null, 2)}`);
   }
   if (githubToken) {
     try {
@@ -32161,7 +32167,9 @@ async function main() {
         core2.info(`[Build Butler] Fleet reported: ${fleetSnap.agents.length} runner(s).`);
       }
     } catch (err) {
-      core2.warning(`[Build Butler] Could not report runner fleet: ${err}`);
+      core2.warning(`[Build Butler] Could not report runner fleet:
+${err?.stack ?? err}
+Request body: ${JSON.stringify(err?.requestBody, null, 2)}`);
       const agentSnap = collectAgent("BUILDING");
       if (agentSnap) await sendAgentSnapshot(opts, agentSnap).catch(() => {
       });
@@ -32172,7 +32180,9 @@ async function main() {
       try {
         await sendAgentSnapshot(opts, agentSnap);
       } catch (err) {
-        core2.warning(`[Build Butler] Could not report runner: ${err}`);
+        core2.warning(`[Build Butler] Could not report runner:
+${err?.stack ?? err}
+Request body: ${JSON.stringify(err?.requestBody, null, 2)}`);
       }
     }
   }
@@ -32186,12 +32196,14 @@ async function main() {
       }
       if (suites.length > 0) core2.info("[Build Butler] Test results reported.");
     } catch (err) {
-      core2.warning(`[Build Butler] Could not report test results: ${err}`);
+      core2.warning(`[Build Butler] Could not report test results:
+${err?.stack ?? err}
+Request body: ${JSON.stringify(err?.requestBody, null, 2)}`);
     }
   }
 }
 main().catch((err) => {
-  core2.setFailed(`[Build Butler] ${err}`);
+  core2.setFailed(`[Build Butler] ${err?.stack ?? err}`);
 });
 /*! Bundled license information:
 

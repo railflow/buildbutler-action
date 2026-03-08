@@ -16,7 +16,9 @@ async function post(opts: SendOptions, path: string, body: unknown): Promise<voi
 
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw new Error(`POST ${path} → ${res.status} ${res.statusText}: ${text}`);
+    const err = new Error(`POST ${path} → ${res.status} ${res.statusText}: ${text}`);
+    (err as any).requestBody = body;
+    throw err;
   }
 }
 

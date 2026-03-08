@@ -25,7 +25,7 @@ async function main() {
         await sendAgentSnapshot(opts, agentSnap);
         core.info('[Build Butler] Runner released → ONLINE');
       } catch (err) {
-        core.warning(`[Build Butler] Could not update runner status: ${err}`);
+        core.warning(`[Build Butler] Could not update runner status:\n${(err as any)?.stack ?? err}\nRequest body: ${JSON.stringify((err as any)?.requestBody, null, 2)}`);
       }
     }
     return;
@@ -41,7 +41,7 @@ async function main() {
     await sendBuild(opts, build);
     core.info('[Build Butler] Build reported.');
   } catch (err) {
-    core.warning(`[Build Butler] Could not report build: ${err}`);
+    core.warning(`[Build Butler] Could not report build:\n${(err as any)?.stack ?? err}\nRequest body: ${JSON.stringify((err as any)?.requestBody, null, 2)}`);
   }
 
   // 2. Send runner fleet snapshot if github-token provided, otherwise single runner
@@ -53,7 +53,7 @@ async function main() {
         core.info(`[Build Butler] Fleet reported: ${fleetSnap.agents.length} runner(s).`);
       }
     } catch (err) {
-      core.warning(`[Build Butler] Could not report runner fleet: ${err}`);
+      core.warning(`[Build Butler] Could not report runner fleet:\n${(err as any)?.stack ?? err}\nRequest body: ${JSON.stringify((err as any)?.requestBody, null, 2)}`);
       // Fall back to single runner
       const agentSnap = collectAgent('BUILDING');
       if (agentSnap) await sendAgentSnapshot(opts, agentSnap).catch(() => {});
@@ -64,7 +64,7 @@ async function main() {
       try {
         await sendAgentSnapshot(opts, agentSnap);
       } catch (err) {
-        core.warning(`[Build Butler] Could not report runner: ${err}`);
+        core.warning(`[Build Butler] Could not report runner:\n${(err as any)?.stack ?? err}\nRequest body: ${JSON.stringify((err as any)?.requestBody, null, 2)}`);
       }
     }
   }
@@ -80,11 +80,11 @@ async function main() {
       }
       if (suites.length > 0) core.info('[Build Butler] Test results reported.');
     } catch (err) {
-      core.warning(`[Build Butler] Could not report test results: ${err}`);
+      core.warning(`[Build Butler] Could not report test results:\n${(err as any)?.stack ?? err}\nRequest body: ${JSON.stringify((err as any)?.requestBody, null, 2)}`);
     }
   }
 }
 
 main().catch((err) => {
-  core.setFailed(`[Build Butler] ${err}`);
+  core.setFailed(`[Build Butler] ${(err as any)?.stack ?? err}`);
 });
