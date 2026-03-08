@@ -6,16 +6,8 @@ inputs:
   api-key:
     description: 'Build Butler API key (store as a repo secret)'
     required: true
-  api-url:
-    description: 'Build Butler API base URL'
-    required: false
-    default: 'https://api.buildbutler.dev'
   test-results:
     description: 'Glob pattern for JUnit XML files (e.g. build/test-results/**/*.xml)'
-    required: false
-    default: ''
-  status:
-    description: 'Override build conclusion (auto-detected from job context if omitted)'
     required: false
     default: ''
   github-token:
