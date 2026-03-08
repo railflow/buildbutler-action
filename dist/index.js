@@ -25902,6 +25902,9 @@ function collectBuild(overrideStatus, queueDurationMs) {
   const workflow = process.env.GITHUB_WORKFLOW;
   const runNumber = parseInt(process.env.GITHUB_RUN_NUMBER, 10);
   const runId = process.env.GITHUB_RUN_ID;
+  const workflowRef = process.env.GITHUB_WORKFLOW_REF ?? "";
+  const workflowFile = workflowRef.match(/\/\.github\/workflows\/([^@]+)/)?.[1];
+  const jobUrl = workflowFile ? `https://github.com/${repo}/actions/workflows/${workflowFile}` : `https://github.com/${repo}/actions`;
   const sha = process.env.GITHUB_SHA;
   const ref = process.env.GITHUB_REF_NAME;
   const eventName = process.env.GITHUB_EVENT_NAME;
@@ -25927,6 +25930,7 @@ function collectBuild(overrideStatus, queueDurationMs) {
     commitSha: sha,
     jenkinsInstanceId: `https://github.com/${repo}`,
     url: `https://github.com/${repo}/actions/runs/${runId}`,
+    jobUrl,
     cause: eventName,
     nodeInfo: runnerName ? { nodeName: runnerName, nodeLabels: runnerLabels ? runnerLabels.split(",").map((s) => s.trim()) : [], isBuiltIn } : void 0,
     source: "github",

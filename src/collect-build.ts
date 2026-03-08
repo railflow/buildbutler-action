@@ -26,6 +26,7 @@ export interface BuildPayload {
   commitSha?: string;
   jenkinsInstanceId: string;
   url: string;
+  jobUrl: string;
   cause?: string;
   nodeInfo?: {
     nodeName: string;
@@ -38,10 +39,16 @@ export interface BuildPayload {
 }
 
 export function collectBuild(overrideStatus?: string, queueDurationMs?: number): BuildPayload {
-  const repo       = process.env.GITHUB_REPOSITORY!;
-  const workflow   = process.env.GITHUB_WORKFLOW!;
-  const runNumber  = parseInt(process.env.GITHUB_RUN_NUMBER!, 10);
-  const runId      = process.env.GITHUB_RUN_ID!;
+  const repo          = process.env.GITHUB_REPOSITORY!;
+  const workflow      = process.env.GITHUB_WORKFLOW!;
+  const runNumber     = parseInt(process.env.GITHUB_RUN_NUMBER!, 10);
+  const runId         = process.env.GITHUB_RUN_ID!;
+  // GITHUB_WORKFLOW_REF = "owner/repo/.github/workflows/ci.yml@refs/heads/main"
+  const workflowRef   = process.env.GITHUB_WORKFLOW_REF ?? '';
+  const workflowFile  = workflowRef.match(/\/\.github\/workflows\/([^@]+)/)?.[1];
+  const jobUrl        = workflowFile
+    ? `https://github.com/${repo}/actions/workflows/${workflowFile}`
+    : `https://github.com/${repo}/actions`;
   const sha        = process.env.GITHUB_SHA;
   const ref        = process.env.GITHUB_REF_NAME;
   const eventName  = process.env.GITHUB_EVENT_NAME;
@@ -72,6 +79,7 @@ export function collectBuild(overrideStatus?: string, queueDurationMs?: number):
     commitSha: sha,
     jenkinsInstanceId: `https://github.com/${repo}`,
     url: `https://github.com/${repo}/actions/runs/${runId}`,
+    jobUrl,
     cause: eventName,
     nodeInfo: runnerName
       ? { nodeName: runnerName, nodeLabels: runnerLabels ? runnerLabels.split(',').map(s => s.trim()) : [], isBuiltIn }
