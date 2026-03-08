@@ -165,48 +165,6 @@ This ensures runner availability is accurate even when jobs fail or are cancelle
 
 ---
 
-## Versioning
-
-Pin to a specific version for stability:
-
-```yaml
-uses: railflow/buildbutler-action@v1        # latest v1.x (recommended)
-uses: railflow/buildbutler-action@v1.2.3    # exact version
-uses: railflow/buildbutler-action@main      # bleeding edge (not for production)
-```
-
-We follow [semantic versioning](https://semver.org/). The `v1` major tag is updated with every backwards-compatible release.
-
----
-
-## Contributing
-
-1. Fork the repo and create a branch: `git checkout -b feat/my-feature`
-2. Make changes in `src/`
-3. Build the bundle: `npm install && npm run build`
-4. Commit **both** source and `dist/`: `git add src/ dist/ && git commit`
-5. Open a pull request
-
-> **Why commit `dist/`?**
-> GitHub Actions runs directly from the repo — there is no install step. The compiled bundle must be committed so the action works without a build step in the consumer's workflow.
-
----
-
-## Publishing a New Release
-
-1. Bump the version in `package.json`
-2. Build: `npm run build`
-3. Commit: `git add . && git commit -m "chore: release vX.Y.Z"`
-4. Tag:
-   ```bash
-   git tag -a vX.Y.Z -m "vX.Y.Z"
-   git tag -fa v1 -m "Update v1 tag"   # move the major tag
-   git push origin main --tags --force
-   ```
-5. On GitHub: **Releases → Draft a new release** → select the tag → check **"Publish this Action to the GitHub Marketplace"** → publish.
-
----
-
 ## License
 
 [MIT](LICENSE) © [Railflow](https://railflow.io)
