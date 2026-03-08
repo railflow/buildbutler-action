@@ -25928,7 +25928,7 @@ function collectBuild(overrideStatus, queueDurationMs) {
     completedAt,
     branch: ref,
     commitSha: sha,
-    jenkinsInstanceId: `https://github.com/${repo}`,
+    jenkinsInstanceId: "https://github.com",
     url: `https://github.com/${repo}/actions/runs/${runId}`,
     jobUrl,
     cause: eventName,
@@ -32048,7 +32048,7 @@ function collectAgent(status) {
   const os = process.env.RUNNER_OS;
   const arch = process.env.RUNNER_ARCH;
   return {
-    jenkinsInstanceId: `https://github.com/${repo}`,
+    jenkinsInstanceId: "https://github.com",
     agents: [{
       name: runnerName,
       status,
@@ -32091,7 +32091,7 @@ async function collectFleetRunners(githubToken) {
   }
   if (runners.length === 0) return null;
   return {
-    jenkinsInstanceId: `https://github.com/${repo}`,
+    jenkinsInstanceId: "https://github.com",
     agents: runners.map((r) => ({
       name: r.name,
       status: mapRunnerStatus(r),
@@ -32151,6 +32151,7 @@ async function main() {
     return;
   }
   const build = collectBuild();
+  core2.info(`[Build Butler] Timing: startedAt=${build.startedAt} completedAt=${build.completedAt} duration=${build.duration}ms`);
   core2.info(`[Build Butler] Reporting build ${build.jobName} #${build.buildNumber} \u2192 ${build.status}`);
   try {
     await sendBuild(opts, build);

@@ -26,7 +26,7 @@ export function collectAgent(status: 'BUILDING' | 'ONLINE'): AgentSnapshotPayloa
   const arch         = process.env.RUNNER_ARCH;
 
   return {
-    jenkinsInstanceId: `https://github.com/${repo}`,
+    jenkinsInstanceId: 'https://github.com',
     agents: [{
       name: runnerName,
       status,
@@ -96,7 +96,7 @@ export async function collectFleetRunners(
   if (runners.length === 0) return null;
 
   return {
-    jenkinsInstanceId: `https://github.com/${repo}`,
+    jenkinsInstanceId: 'https://github.com',
     agents: runners.map((r) => ({
       name: r.name,
       status: mapRunnerStatus(r),

@@ -47,7 +47,7 @@ function collectAgent(status) {
     const os = process.env.RUNNER_OS;
     const arch = process.env.RUNNER_ARCH;
     return {
-        jenkinsInstanceId: `https://github.com/${repo}`,
+        jenkinsInstanceId: 'https://github.com',
         agents: [{
                 name: runnerName,
                 status,
@@ -104,7 +104,7 @@ async function collectFleetRunners(githubToken) {
     if (runners.length === 0)
         return null;
     return {
-        jenkinsInstanceId: `https://github.com/${repo}`,
+        jenkinsInstanceId: 'https://github.com',
         agents: runners.map((r) => ({
             name: r.name,
             status: mapRunnerStatus(r),

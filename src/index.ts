@@ -35,6 +35,7 @@ async function main() {
 
   // 1. Collect and send build
   const build = collectBuild();
+  core.info(`[Build Butler] Timing: startedAt=${build.startedAt} completedAt=${build.completedAt} duration=${build.duration}ms`);
   core.info(`[Build Butler] Reporting build ${build.jobName} #${build.buildNumber} → ${build.status}`);
   try {
     await sendBuild(opts, build);

@@ -77,7 +77,7 @@ export function collectBuild(overrideStatus?: string, queueDurationMs?: number):
     completedAt,
     branch: ref,
     commitSha: sha,
-    jenkinsInstanceId: `https://github.com/${repo}`,
+    jenkinsInstanceId: 'https://github.com',
     url: `https://github.com/${repo}/actions/runs/${runId}`,
     jobUrl,
     cause: eventName,
