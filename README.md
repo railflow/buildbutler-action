@@ -153,6 +153,52 @@ Create the PAT at **Settings → Developer settings → Personal access tokens**
 
 ---
 
+## Organisation-wide Reporting (GitHub Enterprise)
+
+GitHub Enterprise allows admins to enforce a workflow across **all repositories automatically** using [Required Workflows](https://docs.github.com/en/enterprise-cloud@latest/actions/using-workflows/required-workflows) — no changes needed in individual repos.
+
+### Step 1 — Create the Build Butler workflow in a central repo
+
+Create a file in a repository that will act as your policy source (e.g. `myorg/workflow-templates`):
+
+```yaml
+# .github/workflows/buildbutler.yml
+name: Build Butler
+
+on:
+  workflow_run:
+    workflows: ["*"]
+    types: [completed]
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Report to Build Butler
+        uses: railflow/buildbutler-action@v1
+        with:
+          api-key: ${{ secrets.BUILDBUTLER_API_KEY }}
+```
+
+> The `workflow_run` trigger fires after any workflow completes — success or failure — making it ideal for org-wide reporting without touching individual pipelines.
+
+### Step 2 — Add `BUILDBUTLER_API_KEY` as an org secret
+
+**Org Settings → Secrets and variables → Actions → New organisation secret**
+- Name: `BUILDBUTLER_API_KEY`
+- Access: all repositories (or select specific ones)
+
+### Step 3 — Enforce as a Required Workflow
+
+**Org Settings → Actions → Required Workflows → Add workflow**
+- Select the repository and workflow file from Step 1
+- Apply to: all repositories or specific ones
+
+Once set, every workflow run across the org is automatically reported to Build Butler — no per-repo changes needed.
+
+---
+
 ## How It Works
 
 The action runs in two phases managed by the `post:` hook in `action.yml`:
