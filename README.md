@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/buildbutler-logo.png" alt="Build Butler" width="120" />
+</p>
+
 # Build Butler GitHub Action
 
 [![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Build%20Butler-blue?logo=github)](https://github.com/marketplace/actions/build-butler)
@@ -17,7 +21,7 @@ The **Build Butler** GitHub Action automatically captures and ships data from ev
 - **Test results** — JUnit XML parsed and sent as structured test suites
 - **Runner fleet** — self-hosted runner status (BUILDING → ONLINE lifecycle)
 
-![Build Butler Dashboard](docs/screenshot-dashboard.svg)
+![Build Butler Dashboard](docs/screenshot-dashboard.png)
 
 > _Screenshot: Build Butler dashboard showing build trends, test pass rates, and runner utilisation._
 
