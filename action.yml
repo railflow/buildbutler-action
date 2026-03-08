@@ -1,0 +1,40 @@
+name: 'Build Butler'
+description: 'Report build, test, and runner fleet data to Build Butler'
+author: 'BuildButler'
+
+inputs:
+  api-key:
+    description: 'Build Butler API key (store as a repo secret)'
+    required: true
+  api-url:
+    description: 'Build Butler API base URL'
+    required: false
+    default: 'https://api.buildbutler.dev'
+  test-results:
+    description: 'Glob pattern for JUnit XML files (e.g. build/test-results/**/*.xml)'
+    required: false
+    default: ''
+  status:
+    description: 'Override build conclusion (auto-detected from job context if omitted)'
+    required: false
+    default: ''
+  github-token:
+    description: |
+      PAT for full runner fleet reporting (all self-hosted runners, not just the current one).
+      Without this input, only the runner executing this job is reported.
+
+      Required PAT scopes (choose one):
+        Classic PAT  :  manage_runners:org   (org runners, recommended)
+                     OR repo                 (repo-level runners only)
+        Fine-grained :  "Self-hosted runners" → Read  (repo and/or org level)
+
+      Store as a repo/org secret and pass via:
+        github-token: ${{ secrets.GH_RUNNERS_PAT }}
+    required: false
+    default: ''
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+  post: 'dist/index.js'
+  post-if: 'always()'
