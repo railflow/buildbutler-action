@@ -26,7 +26,6 @@ export interface BuildPayload {
   commitSha?: string;
   jenkinsInstanceId: string;
   url: string;
-  jobUrl: string;
   cause?: string;
   nodeInfo?: {
     nodeName: string;
@@ -40,21 +39,20 @@ export interface BuildPayload {
 
 export function collectBuild(overrideStatus?: string, queueDurationMs?: number): BuildPayload {
   const repo          = process.env.GITHUB_REPOSITORY!;
-  const workflow      = process.env.GITHUB_WORKFLOW!;
   const runNumber     = parseInt(process.env.GITHUB_RUN_NUMBER!, 10);
   const runId         = process.env.GITHUB_RUN_ID!;
   // GITHUB_WORKFLOW_REF = "owner/repo/.github/workflows/ci.yml@refs/heads/main"
+  // Use the workflow filename as jobName so the server constructs the correct
+  // job link: jenkinsInstanceId + /actions/workflows/ + jobName
   const workflowRef   = process.env.GITHUB_WORKFLOW_REF ?? '';
   const workflowFile  = workflowRef.match(/\/\.github\/workflows\/([^@]+)/)?.[1];
-  const jobUrl        = workflowFile
-    ? `https://github.com/${repo}/actions/workflows/${workflowFile}`
-    : `https://github.com/${repo}/actions`;
+  const workflow      = workflowFile ?? process.env.GITHUB_WORKFLOW!;
   const sha        = process.env.GITHUB_SHA;
   const ref        = process.env.GITHUB_REF_NAME;
   const eventName  = process.env.GITHUB_EVENT_NAME;
-  // STATE_STARTED_AT is saved by the main step so the post step gets accurate timing.
-  // Fall back to GITHUB_RUN_STARTED_AT then current time as last resort.
-  const startedAt  = core.getState('STARTED_AT') || process.env.GITHUB_RUN_STARTED_AT || new Date().toISOString();
+  // Use GITHUB_RUN_STARTED_AT for whole-workflow duration.
+  // Fall back to saved state then current time as last resort.
+  const startedAt  = process.env.GITHUB_RUN_STARTED_AT || core.getState('STARTED_AT') || new Date().toISOString();
   const completedAt = new Date().toISOString();
   const runnerName  = process.env.RUNNER_NAME;
   const runnerLabels = process.env.RUNNER_LABELS ?? '';
@@ -77,9 +75,8 @@ export function collectBuild(overrideStatus?: string, queueDurationMs?: number):
     completedAt,
     branch: ref,
     commitSha: sha,
-    jenkinsInstanceId: 'https://github.com',
+    jenkinsInstanceId: `https://github.com/${repo}`,
     url: `https://github.com/${repo}/actions/runs/${runId}`,
-    jobUrl,
     cause: eventName,
     nodeInfo: runnerName
       ? { nodeName: runnerName, nodeLabels: runnerLabels ? runnerLabels.split(',').map(s => s.trim()) : [], isBuiltIn }
