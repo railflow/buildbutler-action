@@ -33,3 +33,17 @@ jobs:
             git diff dist/
             exit 1
           fi
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Force-update latest tag
+        run: |
+          git tag -f latest ${{ github.sha }}
+          git push --force origin latest
