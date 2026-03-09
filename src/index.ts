@@ -3,7 +3,8 @@ import * as github from '@actions/github';
 import { collectBuild } from './collect-build';
 import { collectTests }  from './collect-tests';
 import { collectAgent, collectFleetRunners } from './collect-agents';
-import { sendBuild, sendTestSuite, sendAgentSnapshot } from './send';
+import { collectLogs } from './collect-logs';
+import { sendBuild, sendTestSuite, sendAgentSnapshot, sendLogs } from './send';
 
 // action.yml declares `post: dist/index.js` — we use STATE_IS_POST to detect the post step
 const IS_POST = !!process.env.STATE_IS_POST;
@@ -118,6 +119,20 @@ async function main() {
       if (suites.length > 0) core.info('[Build Butler] Test results reported.');
     } catch (err) {
       core.warning(`[Build Butler] Could not report test results: ${err}`);
+    }
+  }
+
+  // 4. Send build logs
+  const logToken = githubToken || process.env.GITHUB_TOKEN;
+  if (logToken) {
+    try {
+      const logsPayload = await collectLogs(logToken, build);
+      if (logsPayload) {
+        await sendLogs(opts, logsPayload);
+        core.info('[Build Butler] Build logs reported.');
+      }
+    } catch (err) {
+      core.warning(`[Build Butler] Could not report build logs: ${err}`);
     }
   }
 }

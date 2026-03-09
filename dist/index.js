@@ -23869,11 +23869,11 @@ var require_github = __commonJS({
     var Context = __importStar(require_context());
     var utils_1 = require_utils4();
     exports2.context = new Context.Context();
-    function getOctokit3(token, options, ...additionalPlugins) {
+    function getOctokit4(token, options, ...additionalPlugins) {
       const GitHubWithPlugins = utils_1.GitHub.plugin(...additionalPlugins);
       return new GitHubWithPlugins((0, utils_1.getOctokitOptions)(token, options));
     }
-    exports2.getOctokit = getOctokit3;
+    exports2.getOctokit = getOctokit4;
   }
 });
 
@@ -25876,7 +25876,7 @@ var require_fxp = __commonJS({
 
 // src/index.ts
 var core2 = __toESM(require_core());
-var github2 = __toESM(require_github());
+var github3 = __toESM(require_github());
 
 // src/collect-build.ts
 var core = __toESM(require_core());
@@ -32104,6 +32104,52 @@ async function collectFleetRunners(githubToken) {
   };
 }
 
+// src/collect-logs.ts
+var github2 = __toESM(require_github());
+async function collectLogs(token, build) {
+  const repo = process.env.GITHUB_REPOSITORY;
+  const [owner, repoName] = repo.split("/");
+  const runId = parseInt(process.env.GITHUB_RUN_ID, 10);
+  const octokit = github2.getOctokit(token);
+  const { data } = await octokit.rest.actions.listJobsForWorkflowRun({
+    owner,
+    repo: repoName,
+    run_id: runId
+  });
+  const parts = [];
+  for (const job of data.jobs) {
+    try {
+      const logsRes = await octokit.request("GET /repos/{owner}/{repo}/actions/jobs/{job_id}/logs", {
+        owner,
+        repo: repoName,
+        job_id: job.id,
+        request: { redirect: "follow" }
+      });
+      const logText = typeof logsRes.data === "string" ? logsRes.data : String(logsRes.data);
+      parts.push(`=== Job: ${job.name} ===
+${logText}`);
+    } catch {
+      parts.push(`=== Job: ${job.name} ===
+[Log not available]
+`);
+    }
+  }
+  if (parts.length === 0) return null;
+  const logContent = parts.join("\n");
+  return {
+    buildId: build.id,
+    jobName: build.jobName,
+    buildNumber: build.buildNumber,
+    status: build.status,
+    jenkinsInstanceId: build.jenkinsInstanceId,
+    branch: build.branch,
+    duration: build.duration,
+    startedAt: build.startedAt,
+    completedAt: build.completedAt,
+    logContent
+  };
+}
+
 // src/send.ts
 async function post(opts, path2, body) {
   const url = `${opts.apiUrl}${path2}`;
@@ -32129,6 +32175,9 @@ async function sendTestSuite(opts, payload) {
 async function sendAgentSnapshot(opts, payload) {
   await post(opts, "/api/v1/ingest/agents", payload);
 }
+async function sendLogs(opts, payload) {
+  await post(opts, "/api/v1/ingest/build-logs", payload);
+}
 
 // src/index.ts
 var IS_POST = !!process.env.STATE_IS_POST;
@@ -32145,7 +32194,7 @@ async function main() {
       const token2 = githubToken || process.env.GITHUB_TOKEN;
       if (token2) {
         try {
-          const octokit = github2.getOctokit(token2);
+          const octokit = github3.getOctokit(token2);
           const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
           const runId = parseInt(process.env.GITHUB_RUN_ID, 10);
           const { data } = await octokit.rest.actions.getWorkflowRun({ owner, repo, run_id: runId });
@@ -32174,7 +32223,7 @@ async function main() {
   const token = githubToken || process.env.GITHUB_TOKEN;
   if (token) {
     try {
-      const octokit = github2.getOctokit(token);
+      const octokit = github3.getOctokit(token);
       const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
       const runId = parseInt(process.env.GITHUB_RUN_ID, 10);
       const { data } = await octokit.rest.actions.getWorkflowRun({ owner, repo, run_id: runId });
@@ -32227,6 +32276,18 @@ async function main() {
       if (suites.length > 0) core2.info("[Build Butler] Test results reported.");
     } catch (err) {
       core2.warning(`[Build Butler] Could not report test results: ${err}`);
+    }
+  }
+  const logToken = githubToken || process.env.GITHUB_TOKEN;
+  if (logToken) {
+    try {
+      const logsPayload = await collectLogs(logToken, build);
+      if (logsPayload) {
+        await sendLogs(opts, logsPayload);
+        core2.info("[Build Butler] Build logs reported.");
+      }
+    } catch (err) {
+      core2.warning(`[Build Butler] Could not report build logs: ${err}`);
     }
   }
 }

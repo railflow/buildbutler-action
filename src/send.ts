@@ -31,3 +31,7 @@ export async function sendTestSuite(opts: SendOptions, payload: unknown): Promis
 export async function sendAgentSnapshot(opts: SendOptions, payload: unknown): Promise<void> {
   await post(opts, '/api/v1/ingest/agents', payload);
 }
+
+export async function sendLogs(opts: SendOptions, payload: unknown): Promise<void> {
+  await post(opts, '/api/v1/ingest/build-logs', payload);
+}

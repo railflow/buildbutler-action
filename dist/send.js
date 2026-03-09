@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendBuild = sendBuild;
 exports.sendTestSuite = sendTestSuite;
 exports.sendAgentSnapshot = sendAgentSnapshot;
+exports.sendLogs = sendLogs;
 async function post(opts, path, body) {
     const url = `${opts.apiUrl}${path}`;
     const res = await fetch(url, {
@@ -26,4 +27,7 @@ async function sendTestSuite(opts, payload) {
 }
 async function sendAgentSnapshot(opts, payload) {
     await post(opts, '/api/v1/ingest/agents', payload);
+}
+async function sendLogs(opts, payload) {
+    await post(opts, '/api/v1/ingest/build-logs', payload);
 }
